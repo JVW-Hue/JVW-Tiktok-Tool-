@@ -286,13 +286,19 @@ function initPayPalButton(buttonId, amount, planName) {
     if (!button || button.classList.contains('current-plan')) return;
     
     button.addEventListener('click', () => {
+        // Check if user is in first 100 and trying to upgrade to Pro
+        if (planName === 'Pro' && currentUser && currentUser.userNumber <= 100) {
+            showToast('You already have Pro for FREE as one of the first 100 users!', 'success', 'Already Pro!');
+            return;
+        }
+        
         const modal = document.createElement('div');
         modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000';
         modal.innerHTML = `
-            <div style="background:white;padding:30px;border-radius:15px;max-width:500px;width:90%;position:relative">
-                <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#666">&times;</button>
-                <h2 style="margin:0 0 10px;color:#8a2be2">Upgrade to ${planName}</h2>
-                <p style="color:#666;margin-bottom:20px">$${amount}/month - Cancel anytime</p>
+            <div style="background:linear-gradient(135deg, #1a0033, #2d1b4e);padding:30px;border-radius:15px;max-width:500px;width:90%;position:relative;border:2px solid rgba(255,215,0,0.3)">
+                <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#ffd700">&times;</button>
+                <h2 style="margin:0 0 10px;color:#ffd700;text-align:center">Upgrade to ${planName}</h2>
+                <p style="color:#fff;margin-bottom:20px;text-align:center">$${amount}/month - Cancel anytime</p>
                 <div id="paypal-button-container-${buttonId}"></div>
             </div>
         `;
