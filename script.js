@@ -286,6 +286,12 @@ function initPayPalButton(buttonId, amount, planName) {
     if (!button || button.classList.contains('current-plan')) return;
     
     button.addEventListener('click', () => {
+        if (!currentUser) {
+            document.getElementById('loginModal').style.display = 'flex';
+            showToast('Please login to upgrade your plan', 'warning', 'Login Required');
+            return;
+        }
+        
         // Check if user is in first 100 and trying to upgrade to Pro
         if (planName === 'Pro' && currentUser && currentUser.userNumber <= 100) {
             showToast('You already have Pro for FREE as one of the first 100 users!', 'success', 'Already Pro!');
@@ -400,6 +406,12 @@ document.getElementById('freeBtn').addEventListener('click', () => {
 document.getElementById('generateBtn').addEventListener('click', generateScript);
 
 function generateScript() {
+    if (!currentUser) {
+        document.getElementById('loginModal').style.display = 'flex';
+        showToast('Please login to generate scripts', 'warning', 'Login Required');
+        return;
+    }
+    
     const topic = document.getElementById('topic').value.trim();
     const length = document.getElementById('length').value;
     const tone = document.getElementById('tone').value;
