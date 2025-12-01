@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI TikTok Script Writer | JVW Empire</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=ASHsiShVN0DhMFiiwRkh1OZh90q4onR6AgdIas2am2sgXhaYtfoN1qSTMKlcrQuzqvwG4UmftDGyiZGx&currency=USD"></script>
+</head>
+<body>
+    <div class="bg-elements" id="bgElements"></div>
+    
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <div class="logo-icon">J</div>
+                <div class="logo-text">JVW Empire</div>
+            </div>
+            <nav>
+                <ul id="navMenu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#generator">Generator</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#features">Features</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu" id="mobileMenu">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>AI TikTok Script Writer</h1>
+            <p>Generate viral-ready scripts for TikTok, Reels, and Shorts in seconds. Powered by AI to create engaging hooks, compelling content, and effective CTAs.</p>
+        </div>
+    </section>
+
+    <section class="generator-section" id="generator">
+        <div class="container">
+            <div class="section-title">
+                <h2>Create Your Script</h2>
+            </div>
+            
+            <div class="plan-badge" id="planBadge">
+                <i class="fas fa-star"></i> Free Plan - 5 scripts remaining today
+            </div>
+            
+            <div class="generator-container">
+                <div class="input-panel">
+                    <div class="form-group">
+                        <label><i class="fas fa-lightbulb"></i> Video Topic/Idea</label>
+                        <textarea id="topic" placeholder="e.g., How to make perfect coffee at home, My morning routine as a student, 5 fitness tips for beginners"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-clock"></i> Video Length</label>
+                            <select id="length">
+                                <option value="15">15 seconds</option>
+                                <option value="30" selected>30 seconds</option>
+                                <option value="60">60 seconds</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-smile"></i> Tone/Style</label>
+                            <select id="tone">
+                                <option value="funny">Funny</option>
+                                <option value="educational" selected>Educational</option>
+                                <option value="serious">Serious</option>
+                                <option value="casual">Casual</option>
+                                <option value="inspirational">Inspirational</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Target Audience</label>
+                        <input type="text" id="audience" placeholder="e.g., Young professionals, Students, Fitness enthusiasts">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-bullseye"></i> Goal/CTA</label>
+                        <select id="cta">
+                            <option value="like">Like & Follow</option>
+                            <option value="comment">Comment</option>
+                            <option value="share">Share</option>
+                            <option value="link">Visit Link</option>
+                            <option value="subscribe">Subscribe</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group pro-feature" id="advancedOptions" style="display: none;">
+                        <label><i class="fas fa-crown"></i> Advanced Options (Pro)</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="includeHashtags"> Include trending hashtags</label>
+                            <label><input type="checkbox" id="includeMusic"> Suggest background music</label>
+                            <label><input type="checkbox" id="includeVisuals"> Add visual cues</label>
+                            <label><input type="checkbox" id="multipleVersions"> Generate 3 variations</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group enterprise-feature" id="enterpriseOptions" style="display: none;">
+                        <label><i class="fas fa-building"></i> Enterprise Options</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="useBrandVoice"> Use brand voice</label>
+                            <label><input type="checkbox" id="includeAnalytics"> Add performance predictions</label>
+                            <label><input type="checkbox" id="useTemplate"> Apply custom template</label>
+                            <label><input type="checkbox" id="teamReview"> Send for team review</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group enterprise-feature" id="brandVoiceSection" style="display: none;">
+                        <label><i class="fas fa-microphone"></i> Brand Voice Profile</label>
+                        <select id="brandVoice">
+                            <option value="default">Default Brand Voice</option>
+                            <option value="professional">Professional & Authoritative</option>
+                            <option value="friendly">Friendly & Conversational</option>
+                            <option value="energetic">Energetic & Enthusiastic</option>
+                            <option value="minimal">Minimal & Direct</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group enterprise-feature" id="templateSection" style="display: none;">
+                        <label><i class="fas fa-file-alt"></i> Custom Template</label>
+                        <select id="customTemplate">
+                            <option value="none">No Template</option>
+                            <option value="product">Product Launch</option>
+                            <option value="tutorial">Tutorial Series</option>
+                            <option value="behind">Behind the Scenes</option>
+                            <option value="testimonial">Customer Testimonial</option>
+                            <option value="announcement">Company Announcement</option>
+                        </select>
+                    </div>
+
+                    <button class="generate-btn" id="generateBtn">
+                        <i class="fas fa-magic"></i> Generate Script
+                    </button>
+                </div>
+
+                <div class="output-panel">
+                    <div class="output-header">
+                        <h3><i class="fas fa-file-alt"></i> Your Script</h3>
+                        <div class="output-actions">
+                            <button class="copy-btn" id="copyBtn" style="display: none;">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="export-btn" id="exportBtn" style="display: none;">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="script-output" id="scriptOutput">
+                        <div class="placeholder">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                            <p>Your AI-generated script will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Choose Your Plan</h2>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="plan-header">
+                        <h3>Free</h3>
+                        <div class="price">$0<span>/month</span></div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 5 scripts per day</li>
+                        <li><i class="fas fa-check"></i> Basic script structure</li>
+                        <li><i class="fas fa-check"></i> Hook + Body + CTA</li>
+                        <li><i class="fas fa-check"></i> 3 tone options</li>
+                        <li><i class="fas fa-times"></i> No hashtag suggestions</li>
+                        <li><i class="fas fa-times"></i> No music suggestions</li>
+                        <li><i class="fas fa-times"></i> No multiple variations</li>
+                    </ul>
+                    <button class="plan-btn current-plan" id="freeBtn">Current Plan</button>
+                </div>
+
+                <div class="pricing-card featured">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <div class="plan-header">
+                        <h3><i class="fas fa-crown"></i> Pro</h3>
+                        <div class="price">$19<span>/month</span></div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Unlimited scripts</li>
+                        <li><i class="fas fa-check"></i> Advanced AI algorithms</li>
+                        <li><i class="fas fa-check"></i> Hook + Body + CTA + Tips</li>
+                        <li><i class="fas fa-check"></i> 5 tone options</li>
+                        <li><i class="fas fa-check"></i> Trending hashtags</li>
+                        <li><i class="fas fa-check"></i> Music suggestions</li>
+                        <li><i class="fas fa-check"></i> 3 script variations</li>
+                        <li><i class="fas fa-check"></i> Visual cues & timing</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                        <li><i class="fas fa-check"></i> Export to PDF</li>
+                    </ul>
+                    <button class="plan-btn pro-btn" id="proBtn">Upgrade to Pro</button>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="plan-header">
+                        <h3><i class="fas fa-building"></i> Enterprise</h3>
+                        <div class="price">$99<span>/month</span></div>
+                    </div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Everything in Pro</li>
+                        <li><i class="fas fa-check"></i> Team collaboration (5 users)</li>
+                        <li><i class="fas fa-check"></i> Brand voice training</li>
+                        <li><i class="fas fa-check"></i> Analytics dashboard</li>
+                        <li><i class="fas fa-check"></i> API access</li>
+                        <li><i class="fas fa-check"></i> Custom templates</li>
+                        <li><i class="fas fa-check"></i> Dedicated account manager</li>
+                    </ul>
+                    <button class="plan-btn" id="enterpriseBtn">Upgrade to Enterprise</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Why Use Our AI Script Writer</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Lightning Fast</h3>
+                    <p>Generate professional scripts in seconds, not hours. Perfect for creators who need to produce content quickly.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI-Powered</h3>
+                    <p>Advanced AI optimized for short-form video content with punchy hooks and engaging storytelling.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Viral-Ready</h3>
+                    <p>Scripts structured for maximum engagement with proven hooks, pacing, and call-to-action formulas.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3>Customizable</h3>
+                    <p>Tailor tone, length, audience, and goals to match your unique style and content strategy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>JVW Empire</h3>
+                    <p>Creating powerful AI tools that transform how you create content and succeed in the digital world.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Tools</h3>
+                    <ul>
+                        <li><a href="#">AI Script Writer</a></li>
+                        <li><a href="#">Hashtag Generator</a></li>
+                        <li><a href="#">Caption Creator</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Best Practices</a></li>
+                        <li><a href="#">Video Tips</a></li>
+                        <li><a href="#">Trending Topics</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Documentation</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2024 JVW Empire. All rights reserved. | Crafted with <i class="fas fa-heart"></i> for creators</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
