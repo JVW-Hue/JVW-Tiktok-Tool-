@@ -46,6 +46,95 @@ body {
     }
 }
 
+/* Login Modal */
+.modal {
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 10px 50px rgba(138, 43, 226, 0.3);
+}
+
+.modal-content h2 {
+    color: #8a2be2;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.modal-content input:focus {
+    border-color: #8a2be2;
+    outline: none;
+}
+
+.modal-content button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    background: linear-gradient(135deg, #8a2be2, #da70d6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.modal-content button:hover {
+    transform: translateY(-2px);
+}
+
+.modal-content p {
+    text-align: center;
+    margin-top: 15px;
+    color: #666;
+}
+
+.modal-content a {
+    color: #8a2be2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #333;
+}
+
 /* Toast Notifications */
 .toast-container {
     position: fixed;

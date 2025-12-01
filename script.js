@@ -93,6 +93,142 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// Authentication & User Management
+let currentUser = null;
+let totalUsers = parseInt(localStorage.getItem('totalUsers') || '0');
+
+function checkAuth() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        return true;
+    }
+    return false;
+}
+
+function showLogin() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+}
+
+function showSignup() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+}
+
+function handleSignup() {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    
+    if (!email || !password) {
+        showToast('Please fill in all fields', 'warning', 'Missing Information');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'warning', 'Weak Password');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    if (users[email]) {
+        showToast('Email already registered. Please login.', 'warning', 'Account Exists');
+        showLogin();
+        return;
+    }
+    
+    totalUsers++;
+    localStorage.setItem('totalUsers', totalUsers.toString());
+    
+    const userPlan = totalUsers <= 100 ? 'pro' : 'free';
+    
+    users[email] = {
+        password: password,
+        plan: userPlan,
+        signupDate: new Date().toISOString(),
+        userNumber: totalUsers
+    };
+    
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    currentUser = { email, plan: userPlan, userNumber: totalUsers };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    document.getElementById('loginModal').style.display = 'none';
+    
+    if (userPlan === 'pro') {
+        showToast(`Congratulations! You're user #${totalUsers} and got Pro FREE! 🎉`, 'success', 'Welcome!');
+    } else {
+        showToast('Account created successfully!', 'success', 'Welcome!');
+    }
+    
+    initializeUser();
+}
+
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        showToast('Please fill in all fields', 'warning', 'Missing Information');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    if (!users[email]) {
+        showToast('Account not found. Please sign up.', 'error', 'Login Failed');
+        return;
+    }
+    
+    if (users[email].password !== password) {
+        showToast('Incorrect password', 'error', 'Login Failed');
+        return;
+    }
+    
+    currentUser = { email, plan: users[email].plan, userNumber: users[email].userNumber };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    document.getElementById('loginModal').style.display = 'none';
+    showToast('Welcome back!', 'success', 'Logged In');
+    
+    initializeUser();
+}
+
+function initializeUser() {
+    if (currentUser.plan === 'pro') {
+        currentPlan = 'pro';
+        scriptsRemaining = 999;
+        document.getElementById('advancedOptions').style.display = 'block';
+        document.querySelector('.pro-feature').style.opacity = '1';
+        document.getElementById('proBtn').classList.add('current-plan');
+        document.getElementById('proBtn').textContent = 'Current Plan';
+        document.getElementById('freeBtn').classList.remove('current-plan');
+        document.getElementById('freeBtn').textContent = 'Downgrade';
+    } else if (currentUser.plan === 'enterprise') {
+        currentPlan = 'enterprise';
+        scriptsRemaining = 999;
+        document.getElementById('advancedOptions').style.display = 'block';
+        document.getElementById('enterpriseOptions').style.display = 'block';
+        document.getElementById('brandVoiceSection').style.display = 'block';
+        document.getElementById('templateSection').style.display = 'block';
+        document.querySelector('.pro-feature').style.opacity = '1';
+        document.querySelectorAll('.enterprise-feature').forEach(el => el.style.opacity = '1');
+        document.getElementById('enterpriseBtn').classList.add('current-plan');
+        document.getElementById('enterpriseBtn').textContent = 'Current Plan';
+    }
+    updatePlanBadge();
+    updateUserCount();
+}
+
+function updateUserCount() {
+    document.getElementById('userCount').textContent = totalUsers;
+    if (totalUsers >= 100) {
+        document.getElementById('limitedOffer').style.display = 'none';
+    }
+}
+
 // Plan management
 let currentPlan = 'free'; // 'free', 'pro', 'enterprise'
 let scriptsRemaining = 5;
@@ -169,6 +305,15 @@ function initPayPalButton(buttonId, amount, planName) {
                         document.getElementById('freeBtn').textContent = 'Downgrade';
                         document.getElementById('proBtn').classList.add('current-plan');
                         document.getElementById('proBtn').textContent = 'Current Plan';
+                        
+                        if (currentUser) {
+                            const users = JSON.parse(localStorage.getItem('users') || '{}');
+                            users[currentUser.email].plan = 'pro';
+                            localStorage.setItem('users', JSON.stringify(users));
+                            currentUser.plan = 'pro';
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        }
+                        
                         showToast('Payment successful! You now have unlimited scripts and advanced features!', 'success', '🎉 Welcome to Pro!');
                     } else if (planName === 'Enterprise') {
                         currentPlan = 'enterprise';
@@ -186,6 +331,15 @@ function initPayPalButton(buttonId, amount, planName) {
                         document.getElementById('proBtn').textContent = 'Downgrade';
                         document.getElementById('enterpriseBtn').classList.add('current-plan');
                         document.getElementById('enterpriseBtn').textContent = 'Current Plan';
+                        
+                        if (currentUser) {
+                            const users = JSON.parse(localStorage.getItem('users') || '{}');
+                            users[currentUser.email].plan = 'enterprise';
+                            localStorage.setItem('users', JSON.stringify(users));
+                            currentUser.plan = 'enterprise';
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        }
+                        
                         showToast('Payment successful! Welcome to Enterprise with team collaboration and advanced features!', 'success', '🏢 Enterprise Activated');
                     }
                 });
@@ -676,4 +830,13 @@ document.getElementById('copyBtn').addEventListener('click', function() {
 });
 
 // Initialize
-window.addEventListener('load', createBackgroundElements);
+window.addEventListener('load', () => {
+    createBackgroundElements();
+    updateUserCount();
+    
+    if (!checkAuth()) {
+        document.getElementById('loginModal').style.display = 'flex';
+    } else {
+        initializeUser();
+    }
+});
