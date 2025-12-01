@@ -130,6 +130,17 @@ body {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
 }
 
+.modal-content input:-webkit-autofill,
+.modal-content input:-webkit-autofill:hover,
+.modal-content input:-webkit-autofill:focus,
+.modal-content input:-webkit-autofill:active {
+    -webkit-text-fill-color: #f5f5f5 !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(26, 26, 26, 0.7) inset !important;
+    box-shadow: 0 0 0px 1000px rgba(26, 26, 26, 0.7) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    border: 2px solid rgba(255, 215, 0, 0.3) !important;
+}
+
 .modal-content button {
     width: 100%;
     padding: 15px;
