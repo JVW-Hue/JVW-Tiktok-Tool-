@@ -61,64 +61,111 @@ body {
 }
 
 .modal-content {
-    background: white;
+    background: linear-gradient(135deg, #1a0033 0%, #2d1b4e 100%);
     padding: 40px;
     border-radius: 20px;
     max-width: 400px;
     width: 90%;
     position: relative;
-    box-shadow: 0 10px 50px rgba(138, 43, 226, 0.3);
+    box-shadow: 0 10px 50px rgba(255, 215, 0, 0.3);
+    border: 2px solid rgba(255, 215, 0, 0.3);
 }
 
 .modal-content h2 {
-    color: #8a2be2;
+    color: #ffd700;
     margin-bottom: 20px;
     text-align: center;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
 .modal-content input {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 2px solid #e0e0e0;
+    border: 2px solid rgba(255, 215, 0, 0.3);
     border-radius: 8px;
     font-size: 16px;
     box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: all 0.3s;
+}
+
+.modal-content input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .modal-content input:focus {
-    border-color: #8a2be2;
+    border-color: #ffd700;
     outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
 .modal-content button {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    background: linear-gradient(135deg, #8a2be2, #da70d6);
-    color: white;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #1a0033;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
 .modal-content button:hover {
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
 }
 
 .modal-content p {
     text-align: center;
     margin-top: 15px;
-    color: #666;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .modal-content a {
-    color: #8a2be2;
+    color: #ffd700;
     text-decoration: none;
     font-weight: bold;
+    transition: color 0.3s;
+}
+
+.modal-content a:hover {
+    color: #ffed4e;
+}
+
+.login-error {
+    background: rgba(255, 68, 68, 0.2);
+    border: 2px solid #ff4444;
+    color: #ffcccc;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+    font-weight: bold;
+    animation: shake 0.5s;
+}
+
+.login-success {
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid #ffd700;
+    color: #ffd700;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+    font-weight: bold;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
 }
 
 .close {
@@ -127,12 +174,14 @@ body {
     top: 15px;
     font-size: 28px;
     font-weight: bold;
-    color: #999;
+    color: rgba(255, 215, 0, 0.6);
     cursor: pointer;
+    transition: all 0.3s;
 }
 
 .close:hover {
-    color: #333;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
 }
 
 /* Toast Notifications */

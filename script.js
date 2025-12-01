@@ -106,14 +106,26 @@ function checkAuth() {
     return false;
 }
 
+function showLoginError(message, isSuccess = false) {
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.textContent = message;
+    errorDiv.className = isSuccess ? 'login-success' : 'login-error';
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 4000);
+}
+
 function showLogin() {
     document.getElementById('loginForm').style.display = 'block';
     document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('loginError').style.display = 'none';
 }
 
 function showSignup() {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('loginError').style.display = 'none';
 }
 
 function handleSignup() {
@@ -121,20 +133,20 @@ function handleSignup() {
     const password = document.getElementById('signupPassword').value;
     
     if (!email || !password) {
-        showToast('Please fill in all fields', 'warning', 'Missing Information');
+        showLoginError('⚠️ Please fill in all fields');
         return;
     }
     
     if (password.length < 6) {
-        showToast('Password must be at least 6 characters', 'warning', 'Weak Password');
+        showLoginError('⚠️ Password must be at least 6 characters');
         return;
     }
     
     const users = JSON.parse(localStorage.getItem('users') || '{}');
     
     if (users[email]) {
-        showToast('Email already registered. Please login.', 'warning', 'Account Exists');
-        showLogin();
+        showLoginError('⚠️ Email already registered. Please login.');
+        setTimeout(() => showLogin(), 2000);
         return;
     }
     
@@ -158,9 +170,12 @@ function handleSignup() {
     document.getElementById('loginModal').style.display = 'none';
     
     if (userPlan === 'pro') {
-        showToast(`Congratulations! You're user #${totalUsers} and got Pro FREE! 🎉`, 'success', 'Welcome!');
+        showLoginError(`🎉 Congratulations! You're user #${totalUsers} and got Pro FREE!`, true);
+        setTimeout(() => {
+            showToast(`You're user #${totalUsers} and got Pro FREE! 🎉`, 'success', 'Welcome!');
+        }, 1000);
     } else {
-        showToast('Account created successfully!', 'success', 'Welcome!');
+        showLoginError('✅ Account created successfully!', true);
     }
     
     initializeUser();
@@ -171,19 +186,19 @@ function handleLogin() {
     const password = document.getElementById('loginPassword').value;
     
     if (!email || !password) {
-        showToast('Please fill in all fields', 'warning', 'Missing Information');
+        showLoginError('⚠️ Please fill in all fields');
         return;
     }
     
     const users = JSON.parse(localStorage.getItem('users') || '{}');
     
     if (!users[email]) {
-        showToast('Account not found. Please sign up.', 'error', 'Login Failed');
+        showLoginError('❌ Account not found. Please sign up.');
         return;
     }
     
     if (users[email].password !== password) {
-        showToast('Incorrect password', 'error', 'Login Failed');
+        showLoginError('❌ Incorrect password');
         return;
     }
     
