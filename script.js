@@ -167,18 +167,20 @@ function handleSignup() {
     currentUser = { email, plan: userPlan, userNumber: totalUsers };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     
-    document.getElementById('loginModal').style.display = 'none';
-    
     if (userPlan === 'pro') {
         showLoginError(`🎉 Congratulations! You're user #${totalUsers} and got Pro FREE!`, true);
         setTimeout(() => {
+            document.getElementById('loginModal').style.display = 'none';
             showToast(`You're user #${totalUsers} and got Pro FREE! 🎉`, 'success', 'Welcome!');
-        }, 1000);
+            initializeUser();
+        }, 2000);
     } else {
         showLoginError('✅ Account created successfully!', true);
+        setTimeout(() => {
+            document.getElementById('loginModal').style.display = 'none';
+            initializeUser();
+        }, 1500);
     }
-    
-    initializeUser();
 }
 
 function handleLogin() {
@@ -205,10 +207,13 @@ function handleLogin() {
     currentUser = { email, plan: users[email].plan, userNumber: users[email].userNumber };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     
-    document.getElementById('loginModal').style.display = 'none';
-    showToast('Welcome back!', 'success', 'Logged In');
+    showLoginError('✅ Welcome back!', true);
     
-    initializeUser();
+    setTimeout(() => {
+        document.getElementById('loginModal').style.display = 'none';
+        showToast('Welcome back!', 'success', 'Logged In');
+        initializeUser();
+    }, 1500);
 }
 
 function initializeUser() {

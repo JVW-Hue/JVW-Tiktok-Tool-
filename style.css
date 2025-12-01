@@ -115,12 +115,13 @@ body {
     font-size: 16px;
     box-sizing: border-box;
     background: rgba(26, 26, 26, 0.7);
-    color: #f5f5f5;
+    color: #FFD700;
     transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .modal-content input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 215, 0, 0.4);
 }
 
 .modal-content input:focus {
@@ -128,6 +129,15 @@ body {
     outline: none;
     background: rgba(26, 26, 26, 0.9);
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    color: #FFD700;
+}
+
+.modal-content input:-webkit-autofill,
+.modal-content input:-webkit-autofill:hover,
+.modal-content input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #FFD700;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(26, 26, 26, 0.9) inset;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .modal-content button {
