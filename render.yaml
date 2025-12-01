@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: jvw-tiktok-tool
+    env: python
+    buildCommand: ""
+    startCommand: python run_app.py
