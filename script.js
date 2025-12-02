@@ -95,7 +95,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // Authentication & User Management
 let currentUser = null;
-let totalUsers = parseInt(localStorage.getItem('totalUsers') || '0');
+let totalUsers = 0;
 
 function checkAuth() {
     const savedUser = localStorage.getItem('currentUser');
@@ -128,7 +128,7 @@ function showSignup() {
     document.getElementById('loginError').style.display = 'none';
 }
 
-function handleSignup() {
+async function handleSignup() {
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     
@@ -150,36 +150,53 @@ function handleSignup() {
         return;
     }
     
-    totalUsers++;
-    localStorage.setItem('totalUsers', totalUsers.toString());
-    
-    const userPlan = totalUsers <= 100 ? 'pro' : 'free';
-    
-    users[email] = {
-        password: password,
-        plan: userPlan,
-        signupDate: new Date().toISOString(),
-        userNumber: totalUsers
-    };
-    
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    currentUser = { email, plan: userPlan, userNumber: totalUsers };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    if (userPlan === 'pro') {
-        showLoginError(`🎉 Congratulations! You're user #${totalUsers} and got Pro FREE!`, true);
-        setTimeout(() => {
-            document.getElementById('loginModal').style.display = 'none';
-            showToast(`You're user #${totalUsers} and got Pro FREE! 🎉`, 'success', 'Welcome!');
-            initializeUser();
-        }, 2000);
-    } else {
-        showLoginError('✅ Account created successfully!', true);
-        setTimeout(() => {
-            document.getElementById('loginModal').style.display = 'none';
-            initializeUser();
-        }, 1500);
+    try {
+        const response = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        if (!response.ok) {
+            showLoginError('⚠️ Signup failed. Please try again.');
+            return;
+        }
+        
+        const data = await response.json();
+        totalUsers = data.total_users;
+        const userPlan = data.plan;
+        const userNumber = data.user_number;
+        
+        users[email] = {
+            password: password,
+            plan: userPlan,
+            signupDate: new Date().toISOString(),
+            userNumber: userNumber
+        };
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        currentUser = { email, plan: userPlan, userNumber: userNumber };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        updateUserCount();
+        
+        if (userPlan === 'pro') {
+            showLoginError(`🎉 Congratulations! You're user #${userNumber} and got Pro FREE!`, true);
+            setTimeout(() => {
+                document.getElementById('loginModal').style.display = 'none';
+                showToast(`You're user #${userNumber} and got Pro FREE! 🎉`, 'success', 'Welcome!');
+                initializeUser();
+            }, 2000);
+        } else {
+            showLoginError('✅ Account created successfully!', true);
+            setTimeout(() => {
+                document.getElementById('loginModal').style.display = 'none';
+                initializeUser();
+            }, 1500);
+        }
+    } catch (error) {
+        showLoginError('⚠️ Network error. Please try again.');
     }
 }
 
@@ -242,10 +259,18 @@ function initializeUser() {
     updateUserCount();
 }
 
-function updateUserCount() {
-    document.getElementById('userCount').textContent = totalUsers;
-    if (totalUsers >= 100) {
-        document.getElementById('limitedOffer').style.display = 'none';
+async function updateUserCount() {
+    try {
+        const response = await fetch('/api/user-count');
+        const data = await response.json();
+        totalUsers = data.total_users;
+        document.getElementById('userCount').textContent = totalUsers;
+        if (totalUsers >= 100) {
+            document.getElementById('limitedOffer').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Failed to fetch user count');
+        document.getElementById('userCount').textContent = '0';
     }
 }
 
@@ -304,12 +329,12 @@ function initPayPalButton(buttonId, amount, planName) {
         }
         
         const modal = document.createElement('div');
-        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:10000;backdrop-filter:blur(10px)';
         modal.innerHTML = `
-            <div style="background:linear-gradient(135deg, #1a0033, #2d1b4e);padding:30px;border-radius:15px;max-width:500px;width:90%;position:relative;border:2px solid rgba(255,215,0,0.3)">
-                <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#ffd700">&times;</button>
-                <h2 style="margin:0 0 10px;color:#ffd700;text-align:center">Upgrade to ${planName}</h2>
-                <p style="color:#fff;margin-bottom:20px;text-align:center">$${amount}/month - Cancel anytime</p>
+            <div style="background:linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);padding:40px;border-radius:20px;max-width:500px;width:90%;position:relative;border:2px solid rgba(255,215,0,0.3);box-shadow:0 0 30px rgba(255,215,0,0.4)">
+                <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:28px;cursor:pointer;color:#ffd700;width:40px;height:40px;border-radius:50%;transition:all 0.3s" onmouseover="this.style.background='rgba(255,215,0,0.1)';this.style.transform='rotate(90deg)'" onmouseout="this.style.background='none';this.style.transform='rotate(0)'">&times;</button>
+                <h2 style="margin:0 0 15px;color:#ffd700;text-align:center;font-size:2rem;text-shadow:0 0 20px rgba(255,215,0,0.5);background:linear-gradient(135deg, #FFD700 0%, #FFEC8B 50%, #FFD700 100%);-webkit-background-clip:text;background-clip:text;color:transparent">Upgrade to ${planName}</h2>
+                <p style="color:#ccc;margin-bottom:25px;text-align:center;font-size:1.1rem">$${amount}/month - Cancel anytime</p>
                 <div id="paypal-button-container-${buttonId}"></div>
             </div>
         `;
@@ -320,7 +345,7 @@ function initPayPalButton(buttonId, amount, planName) {
                 return actions.order.create({
                     purchase_units: [{
                         amount: { value: amount },
-                        description: `JVW Empire - ${planName} Plan Subscription`
+                        description: `TikTok Script AI - ${planName} Plan Subscription`
                     }]
                 });
             },
@@ -771,12 +796,12 @@ document.getElementById('exportBtn').addEventListener('click', function() {
     // Header
     doc.setFontSize(20);
     doc.setTextColor(138, 43, 226);
-    doc.text('AI TikTok Script', margin, yPos);
+    doc.text('TikTok Script AI', margin, yPos);
     yPos += 10;
     
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text('Generated by JVW Empire', margin, yPos);
+    doc.text('Generated by TikTok Script AI', margin, yPos);
     yPos += 5;
     doc.text(`Date: ${new Date().toLocaleString()}`, margin, yPos);
     yPos += 5;
@@ -839,7 +864,7 @@ document.getElementById('exportBtn').addEventListener('click', function() {
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
         doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, 290, { align: 'center' });
-        doc.text('© 2024 JVW Empire - AI TikTok Script Writer', pageWidth / 2, 285, { align: 'center' });
+        doc.text('© 2024 TikTok Script AI', pageWidth / 2, 285, { align: 'center' });
     }
     
     // Save PDF
@@ -868,9 +893,9 @@ document.getElementById('copyBtn').addEventListener('click', function() {
 });
 
 // Initialize
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     createBackgroundElements();
-    updateUserCount();
+    await updateUserCount();
     
     if (!checkAuth()) {
         document.getElementById('loginModal').style.display = 'flex';

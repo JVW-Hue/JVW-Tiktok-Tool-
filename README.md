@@ -1,4 +1,4 @@
-# JVW AI TikTok Script Writer
+# TikTok Script AI
 
 AI-powered TikTok script generator for viral content creation.
 
@@ -15,16 +15,17 @@ AI-powered TikTok script generator for viral content creation.
 1. Push to GitHub
 2. Connect your GitHub repo to Render
 3. Deploy as a Web Service
-4. Build Command: (leave empty)
+4. Build Command: `pip install -r requirements.txt`
 5. Start Command: `python run_app.py`
 
 ## Local Development
 
 ```bash
+pip install -r requirements.txt
 python run_app.py
 ```
 
 Visit http://localhost:3000
 
 ## License
-© 2024 JVW Empire
+© 2024 TikTok Script AI
