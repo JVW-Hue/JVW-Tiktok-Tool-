@@ -100,6 +100,19 @@ let totalUsers = 0;
 // API Base URL - automatically detects environment
 const API_BASE_URL = window.location.origin;
 
+// Retry fetch with exponential backoff
+async function fetchWithRetry(url, options, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const response = await fetch(url, options);
+            return response;
+        } catch (error) {
+            if (i === maxRetries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+    }
+}
+
 function checkAuth() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -146,7 +159,7 @@ async function handleSignup() {
     }
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/signup`, {
+        const response = await fetchWithRetry(`${API_BASE_URL}/api/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -192,8 +205,9 @@ async function handleSignup() {
             }, 1500);
         }
     } catch (error) {
-        console.error('Signup error:', error);
-        showLoginError('⚠️ Please sign up to continue.');
+        // Silently handle - show signup message
+        showLoginError('⚠️ Please create an account to continue.');
+        setTimeout(() => showSignup(), 2000);
     }
 }
 
@@ -207,7 +221,7 @@ async function handleLogin() {
     }
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/login`, {
+        const response = await fetchWithRetry(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -239,8 +253,9 @@ async function handleLogin() {
             initializeUser();
         }, 1500);
     } catch (error) {
-        console.error('Login error:', error);
+        // Silently handle - show signup message
         showLoginError('❌ Account not found. Please sign up.');
+        setTimeout(() => showSignup(), 2000);
     }
 }
 

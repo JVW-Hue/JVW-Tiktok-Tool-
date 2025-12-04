@@ -58,6 +58,10 @@ def validate_email(email):
 def validate_password(password):
     return len(password) >= 6
 
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
 @app.route('/api/user-count', methods=['GET'])
 @limiter.limit("30 per minute")
 def get_user_count():
