@@ -161,6 +161,30 @@ async function handleSignup() {
         return;
     }
     
+    // Use Supabase for signup
+    const result = await supabaseSignup(email, password);
+    
+    if (!result.success) {
+        if (result.error.includes('already registered')) {
+            showLoginError('⚠️ Email already registered. Please login.');
+            setTimeout(() => showLogin(), 2000);
+        } else {
+            showLoginError('⚠️ ' + result.error);
+        }
+        return;
+    }
+    
+    // Success
+    currentUser = { email, plan: 'free', userNumber: Date.now() };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    showLoginError('✅ Account created successfully!', true);
+    setTimeout(() => {
+        document.getElementById('loginModal').style.display = 'none';
+        initializeUser();
+    }, 1500);
+    return;
+    
     try {
         const response = await fetchWithRetry(`${API_BASE_URL}/api/signup`, {
             method: 'POST',
@@ -231,6 +255,30 @@ async function handleLogin() {
         showLoginError('⚠️ Please fill in all fields');
         return;
     }
+    
+    // Use Supabase for login
+    const result = await supabaseLogin(email, password);
+    
+    if (!result.success) {
+        if (result.error.includes('Invalid login')) {
+            showLoginError('❌ Incorrect email or password');
+        } else {
+            showLoginError('❌ ' + result.error);
+        }
+        return;
+    }
+    
+    // Success
+    currentUser = { email, plan: result.profile?.plan || 'free', userNumber: result.profile?.user_number || Date.now() };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    showLoginError('✅ Welcome back!', true);
+    setTimeout(() => {
+        document.getElementById('loginModal').style.display = 'none';
+        showToast('Welcome back!', 'success', 'Logged In');
+        initializeUser();
+    }, 1500);
+    return;
     
     try {
         const response = await fetchWithRetry(`${API_BASE_URL}/api/login`, {
