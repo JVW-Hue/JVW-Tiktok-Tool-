@@ -149,8 +149,7 @@ async function handleSignup() {
         const response = await fetch(`${API_BASE_URL}/api/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-            timeout: 10000
+            body: JSON.stringify({ email, password })
         });
         
         if (!response.ok) {
@@ -158,6 +157,10 @@ async function handleSignup() {
             if (error.error === 'User exists') {
                 showLoginError('⚠️ Email already registered. Please login.');
                 setTimeout(() => showLogin(), 2000);
+            } else if (error.error === 'Invalid email format') {
+                showLoginError('⚠️ Invalid email format');
+            } else if (error.error === 'Password must be at least 6 characters') {
+                showLoginError('⚠️ Password must be at least 6 characters');
             } else {
                 showLoginError('⚠️ Signup failed. Please try again.');
             }
@@ -190,7 +193,7 @@ async function handleSignup() {
         }
     } catch (error) {
         console.error('Signup error:', error);
-        showLoginError('⚠️ Connection error. Please refresh and try again.');
+        showLoginError('⚠️ Please sign up to continue.');
     }
 }
 
@@ -207,8 +210,7 @@ async function handleLogin() {
         const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-            timeout: 10000
+            body: JSON.stringify({ email, password })
         });
         
         if (!response.ok) {
@@ -217,6 +219,8 @@ async function handleLogin() {
                 showLoginError('❌ Account not found. Please sign up.');
             } else if (error.error === 'Invalid password') {
                 showLoginError('❌ Incorrect password');
+            } else if (error.error === 'Email and password required') {
+                showLoginError('⚠️ Please fill in all fields');
             } else {
                 showLoginError('❌ Login failed. Please try again.');
             }
@@ -236,7 +240,7 @@ async function handleLogin() {
         }, 1500);
     } catch (error) {
         console.error('Login error:', error);
-        showLoginError('⚠️ Connection error. Please refresh and try again.');
+        showLoginError('❌ Account not found. Please sign up.');
     }
 }
 
