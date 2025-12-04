@@ -97,6 +97,9 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 let currentUser = null;
 let totalUsers = 0;
 
+// API Base URL - automatically detects environment
+const API_BASE_URL = window.location.origin;
+
 function checkAuth() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -143,10 +146,11 @@ async function handleSignup() {
     }
     
     try {
-        const response = await fetch('/api/signup', {
+        const response = await fetch(`${API_BASE_URL}/api/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
+            timeout: 10000
         });
         
         if (!response.ok) {
@@ -185,7 +189,8 @@ async function handleSignup() {
             }, 1500);
         }
     } catch (error) {
-        showLoginError('⚠️ Network error. Please try again.');
+        console.error('Signup error:', error);
+        showLoginError('⚠️ Connection error. Please refresh and try again.');
     }
 }
 
@@ -199,10 +204,11 @@ async function handleLogin() {
     }
     
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
+            timeout: 10000
         });
         
         if (!response.ok) {
@@ -229,7 +235,8 @@ async function handleLogin() {
             initializeUser();
         }, 1500);
     } catch (error) {
-        showLoginError('⚠️ Network error. Please try again.');
+        console.error('Login error:', error);
+        showLoginError('⚠️ Connection error. Please refresh and try again.');
     }
 }
 
@@ -295,7 +302,7 @@ function logout() {
 
 async function updateUserCount() {
     try {
-        const response = await fetch('/api/user-count');
+        const response = await fetch(`${API_BASE_URL}/api/user-count`);
         const data = await response.json();
         totalUsers = data.total_users;
         document.getElementById('userCount').textContent = totalUsers;
@@ -393,7 +400,7 @@ function initPayPalButton(buttonId, amount, planName) {
                     // Update backend
                     if (currentUser) {
                         try {
-                            await fetch('/api/upgrade', {
+                            await fetch(`${API_BASE_URL}/api/upgrade`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ email: currentUser.email, plan: newPlan })

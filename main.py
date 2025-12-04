@@ -37,8 +37,11 @@ def load_data():
     return {'total_users': 0, 'users': {}}
 
 def save_data(data):
-    with open(DATA_FILE, 'w') as f:
-        json.dump(data, f)
+    try:
+        with open(DATA_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error saving data: {e}")
 
 @app.route('/')
 def index():
@@ -62,7 +65,7 @@ def get_user_count():
     return jsonify({'total_users': data['total_users']})
 
 @app.route('/api/signup', methods=['POST'])
-@limiter.limit("5 per hour")
+@limiter.limit("20 per hour")
 def signup():
     try:
         data = load_data()
@@ -97,10 +100,11 @@ def signup():
             'total_users': data['total_users']
         })
     except Exception as e:
+        print(f"Signup error: {e}")
         return jsonify({'error': 'Server error'}), 500
 
 @app.route('/api/login', methods=['POST'])
-@limiter.limit("10 per minute")
+@limiter.limit("30 per minute")
 def login():
     try:
         data = load_data()
@@ -138,6 +142,7 @@ def login():
             'login_count': data['users'][email]['login_count']
         })
     except Exception as e:
+        print(f"Login error: {e}")
         return jsonify({'error': 'Server error'}), 500
 
 @app.route('/api/upgrade', methods=['POST'])
