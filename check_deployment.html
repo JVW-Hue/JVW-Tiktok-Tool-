@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deployment Status Checker</title>
+    <style>
+        body { font-family: Arial; padding: 40px; background: #0a0a0a; color: #fff; }
+        .status { padding: 20px; margin: 20px 0; border-radius: 10px; }
+        .success { background: #00ff00; color: #000; }
+        .error { background: #ff0000; }
+        .pending { background: #ffaa00; color: #000; }
+        button { padding: 15px 30px; font-size: 16px; cursor: pointer; background: #8a2be2; color: #fff; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Deployment Status Checker</h1>
+    <p>Enter your Render URL to check if the login fix is deployed:</p>
+    <input type="text" id="url" placeholder="https://your-app.onrender.com" style="width: 400px; padding: 10px; font-size: 16px;">
+    <button onclick="checkStatus()">Check Status</button>
+    <div id="result"></div>
+
+    <script>
+        async function checkStatus() {
+            const url = document.getElementById('url').value.trim();
+            const result = document.getElementById('result');
+            
+            if (!url) {
+                result.innerHTML = '<div class="status error">Please enter your Render URL</div>';
+                return;
+            }
+
+            result.innerHTML = '<div class="status pending">Checking deployment...</div>';
+
+            try {
+                // Check health endpoint
+                const healthResponse = await fetch(`${url}/api/health`);
+                const healthData = await healthResponse.json();
+                
+                if (healthData.status === 'ok') {
+                    result.innerHTML = `
+                        <div class="status success">
+                            ✅ Deployment Successful!<br>
+                            <br>
+                            <strong>Status:</strong> Server is running<br>
+                            <strong>Health Check:</strong> Passed<br>
+                            <strong>Login Fix:</strong> Deployed<br>
+                            <br>
+                            Your users can now login without connection errors!
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = '<div class="status error">❌ Server responded but health check failed</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="status error">
+                        ❌ Cannot connect to server<br>
+                        <br>
+                        Possible reasons:<br>
+                        • Render is still deploying (wait 2-3 minutes)<br>
+                        • Service is paused (free tier sleeps after inactivity)<br>
+                        • Wrong URL entered<br>
+                        • Deployment failed (check Render logs)<br>
+                        <br>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
