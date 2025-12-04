@@ -11,14 +11,8 @@ import re
 app = Flask(__name__, static_folder='.')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
-# CORS with security
-CORS(app, resources={
-    r"/api/*": {
-        "origins": ["*"],
-        "methods": ["GET", "POST"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+# CORS - Allow all origins for maximum compatibility
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Rate limiting to prevent brute force attacks
 limiter = Limiter(
@@ -68,13 +62,17 @@ def get_user_count():
     data = load_data()
     return jsonify({'total_users': data['total_users']})
 
-@app.route('/api/signup', methods=['POST'])
-@limiter.limit("20 per hour")
+@app.route('/api/signup', methods=['POST', 'OPTIONS'])
+@limiter.limit("100 per hour")  # Increased limit
 def signup():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
     try:
+        print(f"Signup request received")
         data = load_data()
         email = request.json.get('email', '').strip().lower()
         password = request.json.get('password', '')
+        print(f"Signup for: {email}")
         
         if not email or not password:
             return jsonify({'error': 'Email and password required'}), 400
@@ -98,22 +96,27 @@ def signup():
         }
         
         save_data(data)
+        print(f"Signup success: User #{data['total_users']}")
         return jsonify({
             'user_number': data['total_users'],
             'plan': user_plan,
             'total_users': data['total_users']
-        })
+        }), 200
     except Exception as e:
         print(f"Signup error: {e}")
         return jsonify({'error': 'Server error'}), 500
 
-@app.route('/api/login', methods=['POST'])
-@limiter.limit("30 per minute")
+@app.route('/api/login', methods=['POST', 'OPTIONS'])
+@limiter.limit("100 per minute")  # Increased limit
 def login():
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'ok'}), 200
     try:
+        print(f"Login request received")
         data = load_data()
         email = request.json.get('email', '').strip().lower()
         password = request.json.get('password', '')
+        print(f"Login for: {email}")
         
         if not email or not password:
             return jsonify({'error': 'Email and password required'}), 400
@@ -139,12 +142,13 @@ def login():
             data['users'][email]['login_count'] = 0
         data['users'][email]['login_count'] += 1
         save_data(data)
+        print(f"Login success: {email}")
         
         return jsonify({
             'plan': data['users'][email]['plan'],
             'user_number': data['users'][email]['user_number'],
             'login_count': data['users'][email]['login_count']
-        })
+        }), 200
     except Exception as e:
         print(f"Login error: {e}")
         return jsonify({'error': 'Server error'}), 500
