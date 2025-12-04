@@ -18,7 +18,10 @@
     <!-- Login Modal -->
     <div id="loginModal" class="modal" style="display: none;">
         <div class="modal-content">
-
+            <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255, 215, 0, 0.1); border-radius: 10px; border: 1px solid rgba(255, 215, 0, 0.3);">
+                <i class="fas fa-lock" style="color: #FFD700; font-size: 24px; margin-bottom: 10px;"></i>
+                <p style="color: #FFD700; font-weight: 600; margin: 0;">🔐 Login Required to Access Generator</p>
+            </div>
             <h2>Welcome to TikTok Script AI</h2>
             <div id="loginError" style="display: none;"></div>
             <div id="loginForm">
@@ -48,6 +51,8 @@
                     <li><a href="#generator">Generator</a></li>
                     <li><a href="#pricing">Pricing</a></li>
                     <li><a href="#features">Features</a></li>
+                    <li><a href="#" id="userMenuBtn" style="display: none;"><i class="fas fa-user"></i> <span id="userEmail"></span></a></li>
+                    <li><a href="#" id="logoutBtn" style="display: none; color: #ff4444;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </nav>
             <div class="mobile-menu" id="mobileMenu">

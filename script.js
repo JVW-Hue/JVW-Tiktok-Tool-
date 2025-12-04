@@ -142,23 +142,21 @@ async function handleSignup() {
         return;
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    
-    if (users[email]) {
-        showLoginError('⚠️ Email already registered. Please login.');
-        setTimeout(() => showLogin(), 2000);
-        return;
-    }
-    
     try {
         const response = await fetch('/api/signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
+            body: JSON.stringify({ email, password })
         });
         
         if (!response.ok) {
-            showLoginError('⚠️ Signup failed. Please try again.');
+            const error = await response.json();
+            if (error.error === 'User exists') {
+                showLoginError('⚠️ Email already registered. Please login.');
+                setTimeout(() => showLogin(), 2000);
+            } else {
+                showLoginError('⚠️ Signup failed. Please try again.');
+            }
             return;
         }
         
@@ -166,15 +164,6 @@ async function handleSignup() {
         totalUsers = data.total_users;
         const userPlan = data.plan;
         const userNumber = data.user_number;
-        
-        users[email] = {
-            password: password,
-            plan: userPlan,
-            signupDate: new Date().toISOString(),
-            userNumber: userNumber
-        };
-        
-        localStorage.setItem('users', JSON.stringify(users));
         
         currentUser = { email, plan: userPlan, userNumber: userNumber };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -200,7 +189,7 @@ async function handleSignup() {
     }
 }
 
-function handleLogin() {
+async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     
@@ -209,31 +198,47 @@ function handleLogin() {
         return;
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    
-    if (!users[email]) {
-        showLoginError('❌ Account not found. Please sign up.');
-        return;
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            if (error.error === 'User not found') {
+                showLoginError('❌ Account not found. Please sign up.');
+            } else if (error.error === 'Invalid password') {
+                showLoginError('❌ Incorrect password');
+            } else {
+                showLoginError('❌ Login failed. Please try again.');
+            }
+            return;
+        }
+        
+        const data = await response.json();
+        currentUser = { email, plan: data.plan, userNumber: data.user_number };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        showLoginError('✅ Welcome back!', true);
+        
+        setTimeout(() => {
+            document.getElementById('loginModal').style.display = 'none';
+            showToast('Welcome back!', 'success', 'Logged In');
+            initializeUser();
+        }, 1500);
+    } catch (error) {
+        showLoginError('⚠️ Network error. Please try again.');
     }
-    
-    if (users[email].password !== password) {
-        showLoginError('❌ Incorrect password');
-        return;
-    }
-    
-    currentUser = { email, plan: users[email].plan, userNumber: users[email].userNumber };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    showLoginError('✅ Welcome back!', true);
-    
-    setTimeout(() => {
-        document.getElementById('loginModal').style.display = 'none';
-        showToast('Welcome back!', 'success', 'Logged In');
-        initializeUser();
-    }, 1500);
 }
 
 function initializeUser() {
+    // Show user info in nav
+    document.getElementById('userMenuBtn').style.display = 'block';
+    document.getElementById('logoutBtn').style.display = 'block';
+    document.getElementById('userEmail').textContent = currentUser.email.split('@')[0];
+    
     if (currentUser.plan === 'pro') {
         currentPlan = 'pro';
         scriptsRemaining = 999;
@@ -257,6 +262,35 @@ function initializeUser() {
     }
     updatePlanBadge();
     updateUserCount();
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    currentPlan = 'free';
+    scriptsRemaining = 5;
+    
+    // Hide user menu
+    document.getElementById('userMenuBtn').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'none';
+    
+    // Reset UI
+    document.getElementById('advancedOptions').style.display = 'none';
+    document.getElementById('enterpriseOptions').style.display = 'none';
+    document.getElementById('brandVoiceSection').style.display = 'none';
+    document.getElementById('templateSection').style.display = 'none';
+    document.getElementById('proBtn').classList.remove('current-plan');
+    document.getElementById('proBtn').textContent = 'Upgrade to Pro';
+    document.getElementById('enterpriseBtn').classList.remove('current-plan');
+    document.getElementById('enterpriseBtn').textContent = 'Upgrade to Enterprise';
+    document.getElementById('freeBtn').classList.add('current-plan');
+    document.getElementById('freeBtn').textContent = 'Current Plan';
+    
+    updatePlanBadge();
+    
+    // Show login modal
+    document.getElementById('loginModal').style.display = 'flex';
+    showToast('Logged out successfully', 'info', 'Goodbye!');
 }
 
 async function updateUserCount() {
@@ -318,7 +352,7 @@ function initPayPalButton(buttonId, amount, planName) {
     button.addEventListener('click', () => {
         if (!currentUser) {
             document.getElementById('loginModal').style.display = 'flex';
-            showToast('Please login to upgrade your plan', 'warning', 'Login Required');
+            showToast('Please login or sign up to upgrade your plan', 'warning', 'Login Required');
             return;
         }
         
@@ -334,7 +368,8 @@ function initPayPalButton(buttonId, amount, planName) {
             <div style="background:linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);padding:40px;border-radius:20px;max-width:500px;width:90%;position:relative;border:2px solid rgba(255,215,0,0.3);box-shadow:0 0 30px rgba(255,215,0,0.4)">
                 <button onclick="this.parentElement.parentElement.remove()" style="position:absolute;top:15px;right:15px;background:none;border:none;font-size:28px;cursor:pointer;color:#ffd700;width:40px;height:40px;border-radius:50%;transition:all 0.3s" onmouseover="this.style.background='rgba(255,215,0,0.1)';this.style.transform='rotate(90deg)'" onmouseout="this.style.background='none';this.style.transform='rotate(0)'">&times;</button>
                 <h2 style="margin:0 0 15px;color:#ffd700;text-align:center;font-size:2rem;text-shadow:0 0 20px rgba(255,215,0,0.5);background:linear-gradient(135deg, #FFD700 0%, #FFEC8B 50%, #FFD700 100%);-webkit-background-clip:text;background-clip:text;color:transparent">Upgrade to ${planName}</h2>
-                <p style="color:#ccc;margin-bottom:25px;text-align:center;font-size:1.1rem">$${amount}/month - Cancel anytime</p>
+                <p style="color:#ccc;margin-bottom:15px;text-align:center;font-size:1.1rem">$${amount}/month - Cancel anytime</p>
+                <p style="color:#ff9999;margin-bottom:25px;text-align:center;font-size:0.85rem;padding:10px;background:rgba(255,68,68,0.1);border-radius:8px;border:1px solid rgba(255,68,68,0.3);"><i class="fas fa-info-circle"></i> Please note: All sales are final. We appreciate your understanding as this helps us maintain quality service for all users.</p>
                 <div id="paypal-button-container-${buttonId}"></div>
             </div>
         `;
@@ -349,9 +384,25 @@ function initPayPalButton(buttonId, amount, planName) {
                     }]
                 });
             },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
+            onApprove: async function(data, actions) {
+                return actions.order.capture().then(async function(details) {
                     modal.remove();
+                    
+                    const newPlan = planName === 'Pro' ? 'pro' : 'enterprise';
+                    
+                    // Update backend
+                    if (currentUser) {
+                        try {
+                            await fetch('/api/upgrade', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: currentUser.email, plan: newPlan })
+                            });
+                        } catch (error) {
+                            console.error('Failed to update plan on server');
+                        }
+                    }
+                    
                     if (planName === 'Pro') {
                         currentPlan = 'pro';
                         scriptsRemaining = 999;
@@ -364,9 +415,6 @@ function initPayPalButton(buttonId, amount, planName) {
                         document.getElementById('proBtn').textContent = 'Current Plan';
                         
                         if (currentUser) {
-                            const users = JSON.parse(localStorage.getItem('users') || '{}');
-                            users[currentUser.email].plan = 'pro';
-                            localStorage.setItem('users', JSON.stringify(users));
                             currentUser.plan = 'pro';
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
                         }
@@ -390,9 +438,6 @@ function initPayPalButton(buttonId, amount, planName) {
                         document.getElementById('enterpriseBtn').textContent = 'Current Plan';
                         
                         if (currentUser) {
-                            const users = JSON.parse(localStorage.getItem('users') || '{}');
-                            users[currentUser.email].plan = 'enterprise';
-                            localStorage.setItem('users', JSON.stringify(users));
                             currentUser.plan = 'enterprise';
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
                         }
@@ -438,7 +483,7 @@ document.getElementById('generateBtn').addEventListener('click', generateScript)
 function generateScript() {
     if (!currentUser) {
         document.getElementById('loginModal').style.display = 'flex';
-        showToast('Please login to generate scripts', 'warning', 'Login Required');
+        showToast('Please login or sign up to generate scripts', 'warning', 'Login Required');
         return;
     }
     
@@ -892,14 +937,31 @@ document.getElementById('copyBtn').addEventListener('click', function() {
     });
 });
 
-// Initialize
-window.addEventListener('load', async () => {
+// Logout button handler
+document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    logout();
+});
+
+// Initialize - ALWAYS show login modal
+window.addEventListener('DOMContentLoaded', async () => {
     createBackgroundElements();
     await updateUserCount();
     
-    if (!checkAuth()) {
-        document.getElementById('loginModal').style.display = 'flex';
-    } else {
+    // Check if user is logged in
+    if (checkAuth()) {
+        // Auto-login if user was previously logged in
+        document.getElementById('loginModal').style.display = 'none';
         initializeUser();
+    } else {
+        // Show login modal if not logged in
+        document.getElementById('loginModal').style.display = 'flex';
     }
 });
+
+// Backup - ensure modal shows if not logged in
+setTimeout(() => {
+    if (!currentUser) {
+        document.getElementById('loginModal').style.display = 'flex';
+    }
+}, 100);
