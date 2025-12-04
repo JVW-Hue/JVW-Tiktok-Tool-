@@ -97,8 +97,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 let currentUser = null;
 let totalUsers = 0;
 
-// API Base URL - automatically detects environment
-const API_BASE_URL = window.location.origin;
+// API Base URL - Points to Render backend
+// TODO: Replace with your actual Render URL after deployment
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : 'https://YOUR-APP-NAME.onrender.com';  // REPLACE THIS WITH YOUR RENDER URL
 
 // Retry fetch with exponential backoff
 async function fetchWithRetry(url, options, maxRetries = 3) {
