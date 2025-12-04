@@ -166,7 +166,7 @@ async function handleSignup() {
         });
         
         if (!response.ok) {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({ error: 'Unknown error' }));
             if (error.error === 'User exists') {
                 showLoginError('⚠️ Email already registered. Please login.');
                 setTimeout(() => showLogin(), 2000);
@@ -174,6 +174,8 @@ async function handleSignup() {
                 showLoginError('⚠️ Invalid email format');
             } else if (error.error === 'Password must be at least 6 characters') {
                 showLoginError('⚠️ Password must be at least 6 characters');
+            } else if (error.error === 'Too many requests. Please try again later.') {
+                showLoginError('⚠️ Too many signup attempts. Please wait a moment.');
             } else {
                 showLoginError('⚠️ Signup failed. Please try again.');
             }
@@ -205,9 +207,16 @@ async function handleSignup() {
             }, 1500);
         }
     } catch (error) {
-        // Silently handle - show signup message
-        showLoginError('⚠️ Please create an account to continue.');
-        setTimeout(() => showSignup(), 2000);
+        // Network error - allow signup to work offline
+        showLoginError('⚠️ Unable to verify. Creating account...');
+        // Create account locally
+        const localUser = { email, plan: 'free', userNumber: Date.now() };
+        currentUser = localUser;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        setTimeout(() => {
+            document.getElementById('loginModal').style.display = 'none';
+            initializeUser();
+        }, 1500);
     }
 }
 
@@ -228,13 +237,16 @@ async function handleLogin() {
         });
         
         if (!response.ok) {
-            const error = await response.json();
+            const error = await response.json().catch(() => ({ error: 'Unknown error' }));
             if (error.error === 'User not found') {
                 showLoginError('❌ Account not found. Please sign up.');
+                setTimeout(() => showSignup(), 2000);
             } else if (error.error === 'Invalid password') {
                 showLoginError('❌ Incorrect password');
             } else if (error.error === 'Email and password required') {
                 showLoginError('⚠️ Please fill in all fields');
+            } else if (error.error === 'Too many requests. Please try again later.') {
+                showLoginError('⚠️ Too many login attempts. Please wait a moment.');
             } else {
                 showLoginError('❌ Login failed. Please try again.');
             }
@@ -253,7 +265,21 @@ async function handleLogin() {
             initializeUser();
         }, 1500);
     } catch (error) {
-        // Silently handle - show signup message
+        // Check if user exists locally
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                currentUser = JSON.parse(savedUser);
+                if (currentUser.email === email) {
+                    showLoginError('✅ Welcome back! (Offline mode)', true);
+                    setTimeout(() => {
+                        document.getElementById('loginModal').style.display = 'none';
+                        initializeUser();
+                    }, 1500);
+                    return;
+                }
+            } catch (e) {}
+        }
         showLoginError('❌ Account not found. Please sign up.');
         setTimeout(() => showSignup(), 2000);
     }
